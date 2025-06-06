@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>single user</title>
+    <link rel="stylesheet" href="./asset/style/global.css" />
+    <link rel="stylesheet" href="./asset/style/page/single-user.css" />
+    <script
+      src="https://kit.fontawesome.com/1a03df0e89.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <header class="header">
+      <nav>
+        <ul>
+          <li><a href="index.html">Github</a></li>
+          <li><a href="time.html">Time</a></li>
+          <li><a href="weather.html">Weather</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <div class="container">
+      <div class="user-info">
+
+        <div class="user-status">
+          <a href="index.html">Back To Search</a>
+          <span class="hireable">
+            hireable :
+            <span class="is-hireable">
+              <i class="fa-solid fa-close close"></i>
+            </span>
+          </span>
+        </div>
+
+        <section class="user-profile">
+          <figure>
+            <img src="" alt="" class="user-image" />
+            <div class="user-name-adress">
+              <span class="user-name"></span>
+              <span class="user-adress"></span>
+            </div>
+          </figure>
+
+          <div class="about-user"></div>
+        </section>
+        <div class="user-activities"></div>
+        <div class="user-repositories"></div>
+      </div>
+    </div>
+    <script type="module">
+import { getUser, getRepositories } from "./asset/script/get-api.js";
+const isHireable = document.querySelector(".is-hireable");
+const body = document.querySelector("body");
+const userProfile = document.querySelector(".user-image");
+const userSelfName = document.querySelector(".user-name");
+const userAdress = document.querySelector(".user-adress");
+const aboutUser = document.querySelector(".about-user");
+const activitiesUser = document.querySelector(".user-activities");
+const repositoryElements = document.querySelector(".user-repositories");
+const locationHref = window.location.href;
+const userName = locationHref.split("?")?.at(1).split("=")?.at(1);
+aboutUser.innerHTML = `<div class="loader"></div>`;
+activitiesUser.innerHTML = `<div class="loader"></div>`;
+
+//  یوزر
+const showUser = async (userName) => {
+  const user = await getUser(userName);
+  if (user.login) {
+    aboutUser.innerHTML = "";
+    activitiesUser.innerHTML = "";
+    if (user.hireable) {
+      isHireable.innerHTML = `<i class="fa-solid fa-check check"></i>`;
+    }
+    // پروفایل
+    userProfile.src = user.avatar_url;
+    userSelfName.innerText = user.name;
+    userAdress.innerText = user.location;
+
+    if (user.bio) {
+      aboutUser.innerHTML += `<span class="user-bio">bio :</span> ${user.bio}`;
+    }
+    if (user.login) {
+      aboutUser.innerHTML += `<a href="https://github.com/${user.login}" class="user-github">Visit Github Page</a>`;
+      aboutUser.innerHTML += `<span>login : ${user.login}</span>`;
+    }    
+    activitiesUser.innerHTML += `
+            <span>Followers : ${user.followers}</span>
+            <span>Following : ${user.following}</span>
+            <span>Public Repos : ${user.public_repos}</span>
+            <span>Public Gists : ${user.public_gists}</span> 
+        `;
+  } else {
+
+    body.innerHTML = user;
+  }
+};
+// ریپازیتوری ها
+const showRepositories = async () => {
+  const repositoriese = await getRepositories(userName);
+  const user = await getUser(userName);
+  const userLogin = user.login;
+  repositoriese.forEach((repo) => {
+    repositoryElements.innerHTML += `
+                <div class="repository">
+                    <a href="https://github.com/${userLogin}/${repo.name}">${repo.name}</a>
+                </div>
+            `;
+  });
+};
+showUser(userName);
+showRepositories();
+
+    </script>
+  </body>
+</html>

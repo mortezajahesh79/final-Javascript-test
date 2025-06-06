@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WEATHER</title>
+    <link rel="stylesheet" href="./asset/style/global.css" />
+    <link rel="stylesheet" href="./asset/style/page/weather.css" />
+    <script
+      src="https://kit.fontawesome.com/1a03df0e89.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <header class="header">
+      <nav>
+        <ul>
+          <li><a href="index.html">Github</a></li>
+          <li><a href="time.html">Time</a></li>
+          <li><a href="weather.html">Weather</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main>
+      <div class="container">
+        <div class="weather-info">
+          <h1>Current Weather</h1>
+          <div class="search-city">
+            <div class="input-search">
+              <input type="text" id="city-name" />
+              <label for="city-name">Search City</label>
+            </div>
+            <button>Search <i class="fa-solid fa-search"></i></button>
+          </div>
+        </div>
+        <div class="weather-status">
+          <div class="adress">
+            <h2 class="city-name"></h2>
+            <h3 class="country-name"></h3>
+            <span class="date"></span>
+          </div>
+          <span class="temperature"></span>
+          <span class="humidity"></span>
+          <span class="description"></span>
+        </div>
+      </div>
+    </main>
+    <script type="module">
+      // Select Dom
+const searchButton = document.querySelector("button");
+const cityNameInput = document.querySelector("#city-name");
+const cityNameDisplay = document.querySelector(".city-name");
+const countryNameDisplay = document.querySelector(".country-name");
+const temperatureDisplay = document.querySelector(".temperature");
+const humidityDisplay = document.querySelector(".humidity");
+const descriptionDisplay = document.querySelector(".description");
+const weatherStatus = document.querySelector(".weather-status");
+// url Api
+const baseUrl = "https://api.openweathermap.org/data/2.5/weather?q=";
+const keyApi = "066d5e431bfd98a9b2613b25912370c3";
+const getWeather = async (query) => {
+  const response = await fetch(`${baseUrl}${query}&appid=${keyApi}`);
+  if (!response.ok) {
+    throw new Error("Network response was not ok");
+  }
+  const data = await response.json();
+  return data;
+};
+//   keshvar
+const getCounteis = async (country) => {
+  const response = await fetch("countries.json");
+  const data = await response.json();
+  return data[country];
+};
+//   hava
+getCounteis();
+const showWeather = async () => {
+  const cityName = cityNameInput.value.trim().toLowerCase();
+  if (cityName) {
+    cityNameInput.value = "";
+    try {
+      const data = await getWeather(cityName);
+      const codeCountry = data.sys.country;
+      const countryName = await getCounteis(codeCountry);
+      cityNameDisplay.innerText = `City: ${data.name}`;
+      countryNameDisplay.innerText = `Country: ${countryName}`;
+      temperatureDisplay.innerText = `Temperature: ${Math.round(
+        data.main.temp - 273.15
+      )}°C`;
+      humidityDisplay.innerText = `Humidity: ${data.main.humidity}%`;
+      descriptionDisplay.innerText = `${data.weather[0].description}`;
+    } catch (error) {
+      weatherStatus.innerHTML = `Error fetching weather data :), ${error} Please try again`;
+    }
+  } else {
+    alert("Please enter a city name");
+  }
+};
+searchButton.addEventListener("click", showWeather);
+document.addEventListener("keyup", function (e) {
+  if (e.code === `Enter`) {
+    showWeather();
+  }
+});
+
+    </script>
+  </body>
+</html>
